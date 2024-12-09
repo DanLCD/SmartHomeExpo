@@ -4,51 +4,47 @@ import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { Link } from 'expo-router';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import { useColorScheme } from '@/hooks/useColorScheme.web';
 
 export default function HomeScreen() {
+    const theme = useColorScheme() ?? 'light';
     return (
         <ParallaxScrollView
             headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
             headerImage={
-                <Image
-                    source={require('@/assets/images/partial-react-logo.png')}
-                    style={styles.reactLogo}
-                />
+                <ThemedView style={styles.logoContainer}>
+                    <Image
+                        source={require('@/assets/gifs/clapping-gif-club-penguin.gif')}
+                        style={styles.appLogo}
+                    />
+                    <Image
+                        source={require('@/assets/images/Logo-utez.png')}
+                        style={styles.otherLogo}
+                    />
+                </ThemedView>
             }>
             <ThemedView style={styles.titleContainer}>
-                <ThemedText type="title">Welcome!</ThemedText>
+                <ThemedText type="title">¡Bienvenido!</ThemedText>
                 <HelloWave />
             </ThemedView>
             <ThemedView style={styles.stepContainer}>
-                <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-                <ThemedText>
-                    Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-                    Press{' '}
-                    <ThemedText type="defaultSemiBold">
-                        {Platform.select({
-                            ios: 'cmd + d',
-                            android: 'cmd + m',
-                            web: 'F12'
-                        })}
-                    </ThemedText>{' '}
-                    to open developer tools.
-                </ThemedText>
+                <ThemedText>Este es un proyecto para demostrar la capacidad del módulo Bluetooth HC-05 con Arduino para controlar dispositivos inalámbricamente.</ThemedText>
+                <ThemedText>¡Espero que te guste!</ThemedText>
             </ThemedView>
             <ThemedView style={styles.stepContainer}>
-                <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-                <ThemedText>
-                    Tap the Explore tab to learn more about what's included in this starter app.
-                </ThemedText>
+                <ThemedText type="subtitle">Para comenzar, asegúrate de que tu dispositivo esté encendido y visible.</ThemedText>
+                <ThemedText>¡No te preocupes! No necesitas emparejar tu dispositivo, la conexión es automática.</ThemedText>
+                <ThemedText>Una vez conectado, podrás ver la lista de dispositivos controlables en la pestaña <ThemedText type="defaultSemiBold"><Link href="/devices"><IconSymbol name="list.bullet" color={theme} /> Dispositivos</Link></ThemedText></ThemedText>
             </ThemedView>
             <ThemedView style={styles.stepContainer}>
-                <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-                <ThemedText>
-                    When you're ready, run{' '}
-                    <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-                    <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-                    <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-                    <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-                </ThemedText>
+                <ThemedText type="title">Integrantes</ThemedText>
+                <ThemedText>Este proyecto fue desarrollado por:</ThemedText>
+                <ThemedText>👨‍💻 <ThemedText type="defaultSemiBold">Luis Daniel Cásares Ramírez</ThemedText></ThemedText>
+                <ThemedText>👨‍💻 <ThemedText type="defaultSemiBold">Ricardo Marín Esquivel</ThemedText></ThemedText>
+                <ThemedText>👨‍💻 <ThemedText type="defaultSemiBold">René Bermudez Maxines</ThemedText></ThemedText>
+                <ThemedText>👨‍💻 <ThemedText type="defaultSemiBold">Francisco Jared Meza</ThemedText></ThemedText>
             </ThemedView>
         </ParallaxScrollView>
     );
@@ -64,11 +60,13 @@ const styles = StyleSheet.create({
         gap: 8,
         marginBottom: 8,
     },
-    reactLogo: {
-        height: 178,
-        width: 290,
-        bottom: 0,
-        left: 0,
-        position: 'absolute',
+    logoContainer: {
+        flex: 1,
+        flexDirection: 'row'
     },
+    appLogo: {
+        transform: [{scaleX: -1}]
+    },
+    otherLogo: {
+    }
 });

@@ -5,12 +5,15 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
+import { Provider } from 'react-redux';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AppHeader } from '@/components/AppHeader';
 import { AppStatus } from '@/components/AppStatus';
-import { alertPermissionsMissing, connect, requestPermissions, StatusContext } from '@/services/connection';
+import { DeviceContext, StatusContext } from '@/services/connection';
 import { Status } from '@/constants/Status';
+import { store } from '@/state/store';
+import { BluetoothDevice } from 'react-native-bluetooth-classic';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -18,19 +21,13 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
     const colorScheme = useColorScheme();
     const [status, setStatus] = useState(Status.DISCONNECTED);
+    const [device, setDevice] = useState<BluetoothDevice | null>(null);
     const [loaded] = useFonts({
         SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     });
 
     useEffect(() => {
         if (loaded) {
-            requestPermissions().then(granted => {
-                if (!granted) {
-                    alertPermissionsMissing();
-                } else {
-                    connect(setStatus, true);
-                }
-            });
             SplashScreen.hideAsync();
         }
     }, [loaded]);
@@ -40,21 +37,25 @@ export default function RootLayout() {
     }
 
     return (
-        <StatusContext.Provider value={status}>
-            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <Stack>
-                    <Stack.Screen 
-                        name="(tabs)" 
-                        options={{
-                            headerShown: true,
-                            headerLeft: props => <AppStatus {...props}/>,
-                            headerTitle: props => <AppHeader {...props} />,
-                            headerTitleAlign: 'center'
-                        }} />
-                    <Stack.Screen name="+not-found" />
-                </Stack>
-                <StatusBar style="auto" />
-            </ThemeProvider>
-        </StatusContext.Provider>
+        <Provider store={store}>
+            <StatusContext.Provider value={[status, setStatus]}>
+                <DeviceContext.Provider value={[device, setDevice]}>
+                    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                        <Stack>
+                            <Stack.Screen 
+                                name="(tabs)" 
+                                options={{
+                                    headerShown: true,
+                                    headerLeft: props => <AppStatus {...props}/>,
+                                    headerTitle: props => <AppHeader {...props} />,
+                                    headerTitleAlign: 'center'
+                                }} />
+                            <Stack.Screen name="+not-found" />
+                        </Stack>
+                        <StatusBar style="auto" />
+                    </ThemeProvider>
+                </DeviceContext.Provider>
+            </StatusContext.Provider>
+        </Provider>
     );
 }

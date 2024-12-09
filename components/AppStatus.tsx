@@ -15,7 +15,7 @@ const ICONS: Record<Status, import('expo-symbols').SymbolViewProps['name']> = {
 };
 
 export function AppStatus(props: NativeStackHeaderLeftProps) {
-    const status = useContext(StatusContext);
+    const [status, setStatus] = useContext(StatusContext);
     const theme = useColorScheme() ?? 'light';
     return <IconSymbol size={28} name={ICONS[status]} color={theme === 'light' ? Colors.light.icon : Colors.dark.icon} style={status == Status.DISCONNECTED ? styles.symbol : styles.symbolActive} />;
 }

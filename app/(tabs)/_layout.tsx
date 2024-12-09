@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Platform } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
@@ -7,9 +7,24 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useAppDispatch } from '@/hooks/useAppDispatch';
+import { alertPermissionsMissing, connect, DeviceContext, requestPermissions, StatusContext } from '@/services/connection';
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
+    const [status, setStatus] = useContext(StatusContext);
+    const [device, setDevice] = useContext(DeviceContext);
+    const dispatch = useAppDispatch();
+
+    useEffect(() => {
+        requestPermissions().then(granted => {
+            if (!granted) {
+                alertPermissionsMissing();
+            } else {
+                connect(true, setStatus, setDevice, dispatch);
+            }
+        });
+    }, []);
 
     return (
         <Tabs

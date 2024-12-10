@@ -16,12 +16,12 @@ export default function HomeScreen() {
             headerImage={
                 <ThemedView style={styles.logoContainer}>
                     <Image
-                        source={require('@/assets/gifs/clapping-gif-club-penguin.gif')}
-                        style={styles.appLogo}
-                    />
-                    <Image
                         source={require('@/assets/images/Logo-utez.png')}
                         style={styles.otherLogo}
+                    />
+                    <Image
+                        source={require('@/assets/gifs/clapping-gif-club-penguin.gif')}
+                        style={styles.appLogo}
                     />
                 </ThemedView>
             }>
@@ -68,5 +68,7 @@ const styles = StyleSheet.create({
         transform: [{scaleX: -1}]
     },
     otherLogo: {
+        position: 'absolute',
+        transform: [{scale: 0.5}]
     }
 });

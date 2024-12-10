@@ -1,4 +1,4 @@
-package com.anonymous.SmartHomeExpo
+package com.danlcd.SmartHome
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

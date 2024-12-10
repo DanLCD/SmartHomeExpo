@@ -17,11 +17,14 @@ export const placeSlice = createSlice({
         },
         deletePlace: (state, action) => {
             return state.filter(place => place.id !== action.payload.id);
+        },
+        resetPlaces: (state) => {
+            return [];
         }
     }
 });
 
-export const { updatePlace, deletePlace } = placeSlice.actions
+export const { updatePlace, deletePlace, resetPlaces } = placeSlice.actions
 export const placeReducer = placeSlice.reducer;
 
 const initialDevices = [] satisfies Device[] as Device[];
@@ -40,9 +43,12 @@ export const deviceSlice = createSlice({
         },
         deleteDevice: (state, action) => {
             return state.filter(device => device.id !== action.payload.id);
+        },
+        resetDevices: (state) => {
+            return [];
         }
     }
 });
 
-export const { updateDevice, deleteDevice } = deviceSlice.actions
+export const { updateDevice, deleteDevice, resetDevices } = deviceSlice.actions
 export const deviceReducer = deviceSlice.reducer;

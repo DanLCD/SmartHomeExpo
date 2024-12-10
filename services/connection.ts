@@ -4,7 +4,7 @@ import { Alert, BackHandler, PermissionsAndroid, Platform } from "react-native";
 import { openSettings } from "react-native-permissions";
 import * as ExpoDevice from 'expo-device';
 import RNBluetoothClassic, { BluetoothDevice } from "react-native-bluetooth-classic";
-import { deleteDevice, deletePlace, updateDevice, updatePlace } from "@/state/reducers";
+import { deleteDevice, deletePlace, updateDevice, updatePlace, resetDevices, resetPlaces } from "@/state/reducers";
 import { useAppDispatch } from "@/hooks/useAppDispatch";
 import { Payload } from "@/types/net";
 
@@ -77,6 +77,7 @@ const Devices = [
 ];
 
 export const StatusContext = createContext<[Status, Dispatch<SetStateAction<Status>>]>([Status.DISCONNECTED, () => { }]);
+export const StatusTextContext = createContext<[string, Dispatch<SetStateAction<string>>]>(['Esperando para comenzar conexión', () => { }]);
 export const DeviceContext = createContext<[BluetoothDevice | null, Dispatch<SetStateAction<BluetoothDevice | null>>]>([null, () => { }]);
 
 export async function requestAndroid31Permissions() {
@@ -90,7 +91,7 @@ export async function requestAndroid31Permissions() {
     );
 
     return fineLocationPermission === PermissionsAndroid.RESULTS.GRANTED;
-};
+}
 
 export async function requestPermissions() {
     if (Platform.OS === "android") {
@@ -110,7 +111,7 @@ export async function requestPermissions() {
     } else {
         return true;
     }
-};
+}
 
 export async function alertPermissionsMissing() {
     Alert.alert('Error', 'Se necesitan permisos de conectividad para usar esta aplicación', [
@@ -132,50 +133,83 @@ export async function alertBluetoothUnavailable() {
     ]);
 }
 
-export async function connect(reconnect: boolean, setStatus: Dispatch<SetStateAction<Status>>, setDevice: Dispatch<SetStateAction<BluetoothDevice | null>>, dispatch: ReturnType<typeof useAppDispatch>) {
+export let connecting = false;
+
+export function isHub(device: BluetoothDevice | null) {
+    return device?.name === 'PACOTITI';
+}
+
+export async function connect(reconnect: boolean, setStatus: Dispatch<SetStateAction<Status>>, setMessage: Dispatch<SetStateAction<string>>, setDevice: Dispatch<SetStateAction<BluetoothDevice | null>>, dispatch: ReturnType<typeof useAppDispatch>) {
+    connecting = true;
+
     if (!(await RNBluetoothClassic.isBluetoothAvailable())) {
+        setMessage('Bluetooth no está disponible');
         alertBluetoothUnavailable();
         return false;
     }
 
     if (!(await RNBluetoothClassic.isBluetoothEnabled()) && !(await RNBluetoothClassic.requestBluetoothEnabled())) {
+        setMessage('Bluetooth no está habilitado');
         alertPermissionsMissing();
         return false;
     }
 
-    let device: BluetoothDevice;
-    let found = false;
+    let devices = await RNBluetoothClassic.getBondedDevices();
+
+    let device: BluetoothDevice | undefined = devices.find(isHub);
+    let found = device != null;
+
+    if (found) {
+        setMessage(`Conectado a ${device!.name}`);
+    }
+
     /*
-    setStatus(Status.SCANNING);
     dispatch(updatePlace(LivingRoom));
     for (const device of Devices) {
         dispatch(updateDevice(device));
     }
     */
 
-    while (!found) {
+    while (!found && connecting) {
+        setStatus(Status.SCANNING);
+
+        setMessage('Buscando dispositivos');
         const devices = await RNBluetoothClassic.startDiscovery();
+        setMessage('');
         for (device of devices) {
-            const isHub = device.extra.get('ARDUINO_HUB') ?? false;
-            if (isHub) {
+            setMessage(`Conectando a ${device.name}`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            if (isHub(device)) {
                 try {
                     setStatus(Status.CONNECTING);
-                    await device.connect({ serviceName: 'ARDUINO_HUB' });
+                    await device.connect();
                 } catch (e) {
+                    setMessage(`Error: ${e}`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
                     continue;
                 }
 
+                setMessage(`Conectado a ${device.name}`);
                 await RNBluetoothClassic.cancelDiscovery();
                 found = true;
                 break;
+            } else {
+                setMessage('');
             }
         }
+    }
+
+    if (!connecting) {
+        if (device) await device.disconnect();
+        await RNBluetoothClassic.cancelDiscovery();
+        return true;
     }
 
     setDevice(device!);
     setStatus(Status.CONNECTED);
 
-    while (await device!.isConnected()) {
+    while (await device!.isConnected() && connecting) {
+        console.log('Reading');
         let payload: Payload;
         try {
             payload = JSON.parse(await device!.read() as string);
@@ -183,6 +217,8 @@ export async function connect(reconnect: boolean, setStatus: Dispatch<SetStateAc
             console.error(e);
             continue;
         }
+
+        console.log('Received', payload);
 
         switch (payload.op) {
             case 'UPDATE_PLACE':
@@ -203,11 +239,19 @@ export async function connect(reconnect: boolean, setStatus: Dispatch<SetStateAc
         }
     }
 
+    await device!.disconnect();
+
     setStatus(Status.DISCONNECTED);
-    if (reconnect) {
-        await connect(reconnect, setStatus, setDevice, dispatch);
+    dispatch(resetDevices());
+    dispatch(resetPlaces());
+    if (reconnect && connecting) {
+        await connect(reconnect, setStatus, setMessage, setDevice, dispatch);
         return true;
     }
 
     return true;
-};
+}
+
+export function disconnect() {
+    connecting = false;
+}

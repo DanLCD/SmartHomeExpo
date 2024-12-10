@@ -2,7 +2,7 @@ import { PropsWithChildren, useContext } from 'react';
 import { StyleSheet } from 'react-native';
 import { ThemedText } from './ThemedText';
 import { Status } from '@/constants/Status';
-import { StatusContext } from '@/services/connection';
+import { StatusContext, StatusTextContext } from '@/services/connection';
 import { useEffect } from 'react';
 import { Animated } from 'react-native';
 import { useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
@@ -16,6 +16,7 @@ const STATUS = {
 
 export function AppHeader(Props: PropsWithChildren) {
     const [status, setStatus] = useContext(StatusContext);
+    const [message, setMessage] = useContext(StatusTextContext);
     const fadeAnimation = useSharedValue(1);
 
     useEffect(() => {
@@ -32,17 +33,26 @@ export function AppHeader(Props: PropsWithChildren) {
     }));
 
     return (
-        <Animated.View style={{...styles.titleContainer, ...style }}>
+        <Animated.View style={{...styles.titleContainer, ...(message ? styles.reducedPadding : styles.padding), ...style }}>
             <ThemedText type="subtitle">{STATUS[status]}</ThemedText>
+            {
+                message ? <ThemedText>{message}</ThemedText> : null
+            }
         </Animated.View>
     );
 }
 
 const styles = StyleSheet.create({
     titleContainer: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 16,
     },
+    reducedPadding: {
+        paddingTop: 16,
+        paddingBottom: 4
+    },
+    padding: {
+        padding: 16
+    }
 });

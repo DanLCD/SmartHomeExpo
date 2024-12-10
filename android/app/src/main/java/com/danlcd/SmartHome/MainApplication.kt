@@ -1,4 +1,4 @@
-package com.anonymous.SmartHomeExpo
+package com.danlcd.SmartHome
 
 import android.app.Application
 import android.content.res.Configuration

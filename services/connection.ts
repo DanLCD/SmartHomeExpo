@@ -160,7 +160,13 @@ export async function connect(reconnect: boolean, setStatus: Dispatch<SetStateAc
     let found = device != null;
 
     if (found) {
+        await device!.connect();
         setMessage(`Conectado a ${device!.name}`);
+        RNBluetoothClassic.onDeviceDisconnected(event => {
+            if (event.device === device) {
+                disconnect();
+            }
+        });
     }
 
     /*
@@ -178,14 +184,12 @@ export async function connect(reconnect: boolean, setStatus: Dispatch<SetStateAc
         setMessage('');
         for (device of devices) {
             setMessage(`Conectando a ${device.name}`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
             if (isHub(device)) {
                 try {
                     setStatus(Status.CONNECTING);
                     await device.connect();
                 } catch (e) {
                     setMessage(`Error: ${e}`);
-                    await new Promise(resolve => setTimeout(resolve, 1000));
                     continue;
                 }
 

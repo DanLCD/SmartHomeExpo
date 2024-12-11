@@ -57,7 +57,7 @@ export function Device({ data, style }: { data: DeviceData, style?: StyleProp<Vi
         if (!device) return;
 
         device.write(JSON.stringify({
-            op: 'CHARACTERISTIC_WRITE',
+            op: 'WRITE_CHARACTERISTIC',
             d: {
                 id,
                 value

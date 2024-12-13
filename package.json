@@ -2,6 +2,7 @@
   "name": "smarthomeexpo",
   "main": "index.js",
   "version": "1.0.0",
+  "owner": "danlcd",
   "scripts": {
     "start": "expo start --dev-client",
     "reset-project": "node ./scripts/reset-project.js",

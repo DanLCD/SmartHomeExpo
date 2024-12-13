@@ -24,7 +24,8 @@
         "android.permission.BLUETOOTH_CONNECT",
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.INTERNET",
-        "android.permission.SYSTEM_ALERT_WINDOW"
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.BLUETOOTH_ADVERTISE"
       ]
     },
     "web": {
@@ -64,6 +65,7 @@
       "eas": {
         "projectId": "b9b89208-18c5-45e7-8560-2d9049e2e849"
       }
-    }
+    },
+    "owner": "danlcd"
   }
 }

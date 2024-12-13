@@ -3,8 +3,8 @@ import { ThemedView } from "./ThemedView";
 import { StyleSheet } from "react-native";
 import { IconSymbol } from "./ui/IconSymbol";
 import { useContext } from "react";
-import { StatusContext } from "@/services/connection";
 import { Status } from "@/constants/Status";
+import { useBluetooth } from "@/hooks/useBluetooth";
 
 const messages: Record<Status, string> = {
     [Status.DISCONNECTED]: "Asegúrate que el dispositivo esté conectado y sea visible, y que Bluetooth esté encendido.",
@@ -14,7 +14,7 @@ const messages: Record<Status, string> = {
 };
 
 export function NoDevicesFound() {
-    const [status, getStatus] = useContext(StatusContext);
+    const { status } = useBluetooth();
 
     return <ThemedView style={styles.container}>
         <IconSymbol size={128} name="icloud.slash" color="grey" />

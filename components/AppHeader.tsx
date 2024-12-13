@@ -2,10 +2,10 @@ import { PropsWithChildren, useContext } from 'react';
 import { StyleSheet } from 'react-native';
 import { ThemedText } from './ThemedText';
 import { Status } from '@/constants/Status';
-import { StatusContext, StatusTextContext } from '@/services/connection';
 import { useEffect } from 'react';
 import { Animated } from 'react-native';
 import { useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
+import { useBluetooth } from '@/hooks/useBluetooth';
 
 const STATUS = {
     [Status.DISCONNECTED]: 'Desconectado',
@@ -15,15 +15,14 @@ const STATUS = {
 }
 
 export function AppHeader(Props: PropsWithChildren) {
-    const [status, setStatus] = useContext(StatusContext);
-    const [message, setMessage] = useContext(StatusTextContext);
+    const { status, statusText } = useBluetooth();
     const fadeAnimation = useSharedValue(1);
 
     useEffect(() => {
         if (status === Status.CONNECTING || status === Status.SCANNING) {
             fadeAnimation.value = withRepeat(
                 withSequence(withTiming(0, { duration: 1000 }), withTiming(1, { duration: 1000 })),
-                10000000 // Run the animation indefinitely
+                -1 // Run the animation indefinitely
             );
         }
     }, [status]);
@@ -33,10 +32,10 @@ export function AppHeader(Props: PropsWithChildren) {
     }));
 
     return (
-        <Animated.View style={{...styles.titleContainer, ...(message ? styles.reducedPadding : styles.padding), ...style }}>
+        <Animated.View style={{...styles.titleContainer, ...(statusText ? styles.reducedPadding : styles.padding), ...style }}>
             <ThemedText type="subtitle">{STATUS[status]}</ThemedText>
             {
-                message ? <ThemedText>{message}</ThemedText> : null
+                statusText ? <ThemedText>{statusText}</ThemedText> : null
             }
         </Animated.View>
     );

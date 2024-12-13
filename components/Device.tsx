@@ -3,8 +3,8 @@ import { ThemedView } from "./ThemedView";
 import { ThemedText } from "./ThemedText";
 import { StyleProp, ViewStyle, StyleSheet, Image, FlatList, Switch, TextInput } from "react-native";
 import Slider from '@react-native-community/slider';
-import { useCallback, useContext } from "react";
-import { DeviceContext } from "@/services/connection";
+import React, { useCallback, useContext } from "react";
+import { useBluetooth } from "@/hooks/useBluetooth";
 
 export function getIcon(type: string) {
     switch (type) {
@@ -52,18 +52,18 @@ export function getCharacteristic(updateCharacteristic: (value: any) => void, ch
 }
 
 export function Device({ data, style }: { data: DeviceData, style?: StyleProp<ViewStyle> }) {
-    const [device, setDevice] = useContext(DeviceContext);
+    const { connectedDevice } = useBluetooth();
     const updateCharacteristic = useCallback((id: string, value: any) => {
-        if (!device) return;
+        if (!connectedDevice) return;
 
-        device.write(JSON.stringify({
+        connectedDevice.write(JSON.stringify({
             op: 'WRITE_CHARACTERISTIC',
             d: {
                 id,
                 value
             }
         }));
-    }, [device]);
+    }, [connectedDevice]);
 
     return <ThemedView style={[styles.container, style]}>
         <Image source={getIcon(data.type)} style={styles.icon} />

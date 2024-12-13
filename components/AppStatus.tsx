@@ -1,11 +1,10 @@
 import { StyleSheet } from 'react-native';
 import { NativeStackHeaderLeftProps } from '@react-navigation/native-stack';
 import { IconSymbol } from './ui/IconSymbol';
-import { useContext } from 'react';
-import { StatusContext } from '@/services/connection';
 import { Status } from '@/constants/Status';
 import { useColorScheme } from '@/hooks/useColorScheme.web';
 import { Colors } from '@/constants/Colors';
+import { useBluetooth } from '@/hooks/useBluetooth';
 
 const ICONS: Record<Status, import('expo-symbols').SymbolViewProps['name']> = {
     [Status.DISCONNECTED]: 'icloud.slash',
@@ -15,7 +14,7 @@ const ICONS: Record<Status, import('expo-symbols').SymbolViewProps['name']> = {
 };
 
 export function AppStatus(props: NativeStackHeaderLeftProps) {
-    const [status, setStatus] = useContext(StatusContext);
+    const { status } = useBluetooth();
     const theme = useColorScheme() ?? 'light';
     return <IconSymbol size={28} name={ICONS[status]} color={theme === 'light' ? Colors.light.icon : Colors.dark.icon} style={status == Status.DISCONNECTED ? styles.symbol : styles.symbolActive} />;
 }
